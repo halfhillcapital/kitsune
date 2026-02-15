@@ -1,5 +1,6 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from functools import lru_cache
 
 
 class MissingEnvironmentVariableError(Exception):
@@ -45,20 +46,29 @@ def required_prompts(file: str) -> str:
         return f.read()
 
 
-@dataclass
+@dataclass(frozen=True)
 class Config:
     """Configuration for the Kitsune application."""
     name: str = "Kitsune"
     version: str = "0.1.0"
 
-    LOCAL_URL: str = required_env("LOCAL_URL", "http://localhost:11434")
-    LOCAL_MODEL: str = required_env("LOCAL_MODEL", "gpt-3.5-turbo")
+    LOCAL_URL: str = field(default_factory=lambda: required_env("LOCAL_URL", "http://localhost:11434"))
+    LOCAL_MODEL: str = field(default_factory=lambda: required_env("LOCAL_MODEL", "gpt-3.5-turbo"))
 
-    OPENROUTER_URL: str = required_env("OPENROUTER_URL", "https://openrouter.ai/api/v1")
-    OPENROUTER_API_KEY: str = required_env("OPENROUTER_API_KEY")
+    OPENROUTER_URL: str = field(default_factory=lambda: required_env("OPENROUTER_URL", "https://openrouter.ai/api/v1"))
+    OPENROUTER_API_KEY: str = field(default_factory=lambda: required_env("OPENROUTER_API_KEY"))
 
-    LINKUP_URL: str = required_env("LINKUP_URL", "https://api.linkup.so/v1")
-    LINKUP_API_KEY: str = required_env("LINKUP_API_KEY")
+    LINKUP_URL: str = field(default_factory=lambda: required_env("LINKUP_URL", "https://api.linkup.so/v1"))
+    LINKUP_API_KEY: str = field(default_factory=lambda: required_env("LINKUP_API_KEY"))
 
-    TAVILY_URL: str = required_env("TAVILY_URL", "https://api.tavily.com")
-    TAVILY_API_KEY: str = required_env("TAVILY_API_KEY")
+    TAVILY_URL: str = field(default_factory=lambda: required_env("TAVILY_URL", "https://api.tavily.com"))
+    TAVILY_API_KEY: str = field(default_factory=lambda: required_env("TAVILY_API_KEY"))
+
+
+@lru_cache(maxsize=1)
+def get_config() -> Config:
+    return Config()
+
+
+def reset_config_cache() -> None:
+    get_config.cache_clear()

@@ -6,7 +6,7 @@ import httpx
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 
-from kitsune.config import Config
+from kitsune.config import get_config
 
 
 class LinkupSource(BaseModel):
@@ -29,9 +29,10 @@ class LinkupFetchResult(BaseModel):
 
 
 async def _linkup_post(endpoint: str, payload: dict) -> dict:
-	url = f"{Config.LINKUP_URL}/{endpoint}"
+	config = get_config()
+	url = f"{config.LINKUP_URL}/{endpoint}"
 	headers = {
-		"Authorization": f"Bearer {Config.LINKUP_API_KEY}",
+		"Authorization": f"Bearer {config.LINKUP_API_KEY}",
 		"Content-Type": "application/json",
 	}
 
