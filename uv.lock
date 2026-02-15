@@ -1110,6 +1110,7 @@ name = "kitsune"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "httpx" },
     { name = "logfire" },
     { name = "nicegui" },
     { name = "pydantic-ai" },
@@ -1118,6 +1119,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "logfire" },
     { name = "nicegui" },
     { name = "pydantic-ai", specifier = ">=1.58.0" },
