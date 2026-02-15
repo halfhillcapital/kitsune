@@ -124,5 +124,5 @@ def frame(title: str = "Kitsune"):
             });
         """)
 
-    with ui.column().classes("w-full max-w-3xl mx-auto p-4"):
-        yield
+    with ui.column().classes("w-full max-w-3xl mx-auto p-4") as content:
+        yield content

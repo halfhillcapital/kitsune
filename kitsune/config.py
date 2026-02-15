@@ -52,8 +52,8 @@ class Config:
     name: str = "Kitsune"
     version: str = "0.1.0"
 
-    LOCAL_URL: str = field(default_factory=lambda: required_env("LOCAL_URL", "http://localhost:11434"))
-    LOCAL_MODEL: str = field(default_factory=lambda: required_env("LOCAL_MODEL", "gpt-3.5-turbo"))
+    LOCAL_URL: str = field(default_factory=lambda: required_env("LOCAL_URL", "http://localhost:11434/v1"))
+    LOCAL_MODEL: str = field(default_factory=lambda: required_env("LOCAL_MODEL", "gemma-3-4b-it"))
 
     OPENROUTER_URL: str = field(default_factory=lambda: required_env("OPENROUTER_URL", "https://openrouter.ai/api/v1"))
     OPENROUTER_API_KEY: str = field(default_factory=lambda: required_env("OPENROUTER_API_KEY"))
