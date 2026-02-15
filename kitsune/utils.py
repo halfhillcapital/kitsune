@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from datetime import datetime, timezone
 
 
@@ -19,6 +20,42 @@ def dedent(text: str) -> str:
 
 def prose(text: str) -> str:
     return dedent(text).replace("\n", " ")
+
+
+def is_public_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+
+        if parsed.scheme not in ("http", "https"):
+            return False
+
+        h = parsed.hostname
+        if not h:
+            return False
+
+        if (
+            h == "localhost"
+            or h in ("[::1]", "::1")
+            or h.startswith("127.")
+            or h.startswith("10.")
+            or h.startswith("192.168.")
+            or h.startswith("0.")
+            or h == "169.254.169.254"
+        ):
+            return False
+
+        if h.startswith("172."):
+            parts = h.split(".")
+            try:
+                octet = int(parts[1]) if len(parts) > 1 else -1
+            except ValueError:
+                octet = -1
+            if 16 <= octet <= 31:
+                return False
+
+        return True
+    except Exception:
+        return False
 
 
 def get_current_datetime(date: datetime | None = None) -> str:
