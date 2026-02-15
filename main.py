@@ -8,6 +8,8 @@ logfire.instrument_pydantic_ai()
 
 app.on_startup(lambda: ui.colors(primary="#7c6af6"))
 
+app.add_static_files("/static", "kitsune/ui/static")
+
 chat.setup()
 dashboard.setup()
 notebooks.setup()
