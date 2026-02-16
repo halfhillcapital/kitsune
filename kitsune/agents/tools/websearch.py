@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, TypeVar
 
 import httpx
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import Agent
 
 from kitsune.config import get_config
 
@@ -79,14 +79,15 @@ async def fetch_linkup(
 	)
 	return LinkupFetchResult.model_validate(data)
 
-
-def with_linkup(agent: Agent) -> Agent:
-    @agent.tool
-    async def search_tool(_: RunContext, query: str, depth: Literal["standard", "deep"] = "standard") -> LinkupSearchResult:
+AgentDepsT = TypeVar("AgentDepsT")
+AgentResultT = TypeVar("AgentResultT")
+def with_linkup(agent: Agent[AgentDepsT, AgentResultT]) -> Agent[AgentDepsT, AgentResultT]:
+    @agent.tool_plain
+    async def search_tool(query: str, depth: Literal["standard", "deep"] = "standard") -> LinkupSearchResult:
         return await search_linkup(query, depth)
 	
-    @agent.tool
-    async def fetch_tool(_: RunContext, url: str, render_js: bool = False) -> LinkupFetchResult:
+    @agent.tool_plain
+    async def fetch_tool(url: str, render_js: bool = False) -> LinkupFetchResult:
         return await fetch_linkup(url, render_js)
 
     return agent

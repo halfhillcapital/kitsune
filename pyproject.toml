@@ -12,3 +12,14 @@ dependencies = [
     "pydantic-ai>=1.59.0",
     "uvicorn[standard]",
 ]
+
+[project.optional-dependencies]
+notebooks = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "seaborn",
+    "plotly",
+    "scikit-learn",
+    "scipy",
+]

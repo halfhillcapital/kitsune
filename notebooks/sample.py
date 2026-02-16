@@ -7,12 +7,17 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell
 def _(mo):
-    mo.md("# Sample Notebook\n\nThis is a sample marimo notebook served in **run mode**.")
+    mo.md("""
+    # Sample Notebook
+
+    This is a sample marimo notebook served in **run mode**.
+    """)
     return
 
 

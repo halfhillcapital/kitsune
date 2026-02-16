@@ -16,13 +16,16 @@ app = FastAPI(title="Kitsune")
 agent = create_agent()
 deps = create_deps()
 
+chat = agent.to_web(deps=deps)
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
 
 # AG-UI chat endpoint
-app.post("/ag-ui")
+@app.post("/ag-ui")
 async def ag_ui(request: Request) -> Response:
     return await AGUIAdapter.dispatch_request(request, agent=agent, deps=deps)
 
@@ -48,4 +51,4 @@ if _nb_dir.exists():
     app.mount("/notebooks", _marimo_app.build())
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8010, reload=True)
+    uvicorn.run("main:chat", host="0.0.0.0", port=8010, reload=True)
