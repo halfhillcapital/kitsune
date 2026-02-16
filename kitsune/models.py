@@ -21,13 +21,3 @@ class Session(BaseModel):
     id: int
     created_at: str
     updated_at: str
-
-
-@dataclass
-class MemoryStore:
-    pass
-
-
-@dataclass
-class Deps:
-    memory: MemoryStore

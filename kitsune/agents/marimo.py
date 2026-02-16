@@ -1,14 +1,16 @@
+from dataclasses import dataclass
+
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
 from kitsune.config import get_config
-from kitsune.models import Deps, MemoryStore
 
 config = get_config()
 
-memory = MemoryStore()
-deps = Deps(memory=memory)
+@dataclass
+class MarimoAgentDeps:
+    pass
 
 model = OpenAIChatModel(
     provider=OpenAIProvider(base_url=config.LOCAL_URL),
@@ -17,8 +19,14 @@ model = OpenAIChatModel(
 
 agent = Agent(
     model=model,
-    deps_type=Deps,
+    deps_type=MarimoAgentDeps,
     instructions=(
         "You are Kitsune, a personal AI assistant with persistent memory."
     ),
 )
+
+def create_deps() -> MarimoAgentDeps:
+    return MarimoAgentDeps()
+
+def create_agent() -> Agent[MarimoAgentDeps]:
+    return agent

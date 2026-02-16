@@ -3,7 +3,11 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:nicegui.io)"
+      "WebFetch(domain:docs.marimo.io)",
+      "WebFetch(domain:tanstack.com)",
+      "WebFetch(domain:ai.pydantic.dev)",
+      "WebFetch(domain:docs.ag-ui.com)",
+      "WebFetch(domain:docs.copilotkit.ai)"
     ]
   }
 }
