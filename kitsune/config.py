@@ -53,7 +53,7 @@ class Config:
     version: str = "0.1.0"
 
     LOCAL_URL: str = field(default_factory=lambda: required_env("LOCAL_URL", "http://localhost:11434/v1"))
-    LOCAL_MODEL: str = field(default_factory=lambda: required_env("LOCAL_MODEL", "gemma-3-4b-it"))
+    LOCAL_MODEL: str = field(default_factory=lambda: required_env("LOCAL_MODEL", "openai/gpt-oss-20b"))
 
     OPENROUTER_URL: str = field(default_factory=lambda: required_env("OPENROUTER_URL", "https://openrouter.ai/api/v1"))
     OPENROUTER_API_KEY: str = field(default_factory=lambda: required_env("OPENROUTER_API_KEY"))
@@ -63,6 +63,12 @@ class Config:
 
     TAVILY_URL: str = field(default_factory=lambda: required_env("TAVILY_URL", "https://api.tavily.com"))
     TAVILY_API_KEY: str = field(default_factory=lambda: required_env("TAVILY_API_KEY"))
+
+    MARIMO_IMAGE: str = field(default_factory=lambda: required_env("MARIMO_IMAGE", "kitsune-marimo-sandbox"))
+    MARIMO_PORT_START: int = field(default_factory=lambda: int(required_env("MARIMO_PORT_START", "9100")))
+    MARIMO_PORT_END: int = field(default_factory=lambda: int(required_env("MARIMO_PORT_END", "9200")))
+    MARIMO_CONTAINER_TIMEOUT: int = field(default_factory=lambda: int(required_env("MARIMO_CONTAINER_TIMEOUT", "30")))
+    NOTEBOOK_DATA_DIR: str = field(default_factory=lambda: required_env("NOTEBOOK_DATA_DIR", "data/notebooks"))
 
 
 @lru_cache(maxsize=1)

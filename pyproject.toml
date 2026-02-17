@@ -5,18 +5,20 @@ description = "AI agent microservice"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "docker",
     "fastapi",
-    "httpx>=0.28.1",
+    "httpx",
     "logfire",
-    "marimo",
-    "pydantic-ai>=1.59.0",
+    "pydantic-ai",
     "uvicorn[standard]",
 ]
 
 [project.optional-dependencies]
 notebooks = [
+    "marimo",
     "numpy",
     "pandas",
+    "polars",
     "matplotlib",
     "seaborn",
     "plotly",
