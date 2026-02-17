@@ -87,6 +87,7 @@ class SandboxManager:
             host_port=port,
         )
         self._containers[session_id] = info
+        await self._wait_until_ready(container, timeout=30)
         return info
 
     async def destroy(self, session_id: str) -> None:
@@ -122,6 +123,34 @@ class SandboxManager:
         return text
 
     # -- internal --
+
+    async def _wait_until_ready(self, container, timeout: int = 30) -> None:
+        """Poll the container until marimo is accepting connections."""
+        import httpx
+
+        port = container.ports.get("2718/tcp")
+        if port:
+            host_port = port[0]["HostPort"]
+        else:
+            host_port = None
+
+        if not host_port:
+            # Fallback: just wait a fixed interval
+            await asyncio.sleep(3)
+            return
+
+        url = f"http://localhost:{host_port}/api/status"
+        async with httpx.AsyncClient() as client:
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                try:
+                    resp = await client.get(url, timeout=2)
+                    if resp.status_code < 500:
+                        return
+                except (httpx.ConnectError, httpx.ReadTimeout):
+                    pass
+                await asyncio.sleep(0.5)
+        raise RuntimeError(f"Marimo container not ready after {timeout}s")
 
     def _allocate_port(self) -> int:
         used = {info.host_port for info in self._containers.values()}
