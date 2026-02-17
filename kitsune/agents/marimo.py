@@ -1,3 +1,4 @@
+import re
 import textwrap
 from dataclasses import dataclass
 from typing import Any
@@ -102,6 +103,16 @@ def _user_dir(ctx: RunContext[MarimoAgentDeps]):
     return ctx.deps.sandbox.get_user_dir(ctx.deps.session_id)
 
 
+def _safe_name(name: str) -> str:
+    """Sanitize notebook name to prevent directory traversal."""
+    # Strip path separators and keep only safe characters
+    base = name.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+    base = base.removesuffix(".py")
+    if not re.fullmatch(r"[A-Za-z0-9_\-]+", base):
+        raise ValueError(f"Invalid notebook name: {name!r}")
+    return base
+
+
 @agent.tool
 async def list_notebooks(ctx: RunContext[MarimoAgentDeps]) -> list[dict[str, str]]:
     """List all marimo notebooks in the user's notebook directory."""
@@ -117,6 +128,7 @@ async def list_notebooks(ctx: RunContext[MarimoAgentDeps]) -> list[dict[str, str
 @agent.tool
 async def read_notebook(ctx: RunContext[MarimoAgentDeps], name: str) -> str:
     """Read the full source code of a marimo notebook by name (without .py extension)."""
+    name = _safe_name(name)
     path = _user_dir(ctx) / f"{name}.py"
     if not path.exists():
         return f"Error: notebook '{name}' not found."
@@ -131,6 +143,7 @@ async def write_notebook(ctx: RunContext[MarimoAgentDeps], name: str, cells: lis
     from other cells), and returns (variables it defines for other cells).
     The first cell should typically import libraries.
     """
+    name = _safe_name(name)
     nb_dir = _user_dir(ctx)
     nb_dir.mkdir(parents=True, exist_ok=True)
     path = nb_dir / f"{name}.py"
@@ -145,6 +158,7 @@ async def run_notebook(ctx: RunContext[MarimoAgentDeps], name: str) -> dict[str,
 
     Useful for verifying a notebook works or inspecting computed results.
     """
+    name = _safe_name(name)
     nb_dir = _user_dir(ctx)
     path = nb_dir / f"{name}.py"
     if not path.exists():
