@@ -10,8 +10,13 @@ RUN uv pip install --system \
     matplotlib \
     seaborn \
     plotly \
+    altair \
     scikit-learn \
-    scipy
+    scipy \
+    duckdb \
+    sqlglot \
+    ruff \
+    openai
 
 RUN mkdir -p /notebooks
 

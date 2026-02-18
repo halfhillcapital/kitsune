@@ -1,6 +1,7 @@
 import re
 import textwrap
 from dataclasses import dataclass
+from importlib.metadata import version
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -24,10 +25,12 @@ class MarimoAgentDeps:
 
 # -- Notebook builder helpers --
 
-MARIMO_HEADER = """\
+_MARIMO_VERSION = version("marimo")
+
+MARIMO_HEADER = f"""\
 import marimo
 
-__generated_with = "0.19.11"
+__generated_with = "{_MARIMO_VERSION}"
 app = marimo.App(width="medium")
 """
 

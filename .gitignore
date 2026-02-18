@@ -210,6 +210,9 @@ static/
 # Frontend dependencies
 frontend/node_modules/
 
+# TypeScript incremental build cache
+*.tsbuildinfo
+
 # Marimo
 marimo/_static/
 marimo/_lsp/

@@ -1,0 +1,34 @@
+services:
+  # Build-only service — never started by `compose up`, but built by `compose --profile build build`
+  marimo-sandbox:
+    build:
+      context: ..
+      dockerfile: docker/marimo/Dockerfile
+    image: kitsune-marimo-sandbox
+    profiles: ["tools"]
+
+  kitsune:
+    build:
+      context: ..
+      dockerfile: docker/kitsune/Dockerfile
+    ports:
+      - "8010:8010"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../data/notebooks:/app/data/notebooks
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # reach host services (e.g. Ollama)
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      NOTEBOOK_DATA_DIR: /app/data/notebooks
+      # NOTEBOOK_HOST_DIR must be the absolute host path to ./data/notebooks so that
+      # sibling sandbox containers can mount it. Set this in .env or override here.
+      # Example: NOTEBOOK_HOST_DIR=/home/you/kitsune/data/notebooks
+      NOTEBOOK_HOST_DIR: ${NOTEBOOK_HOST_DIR:-}
+      LOCAL_URL: ${LOCAL_URL:-http://host.docker.internal:11434/v1}
+      LOCAL_MODEL: ${LOCAL_MODEL:-openai/gpt-oss-20b}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      LINKUP_API_KEY: ${LINKUP_API_KEY:-}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}

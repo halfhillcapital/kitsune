@@ -1,23 +1,35 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { Send } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 
 export function ChatPanel() {
   const sessionId = useSession();
+  const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
+  const { messages, status, sendMessage } = useChat({
+    transport: new DefaultChatTransport({
       api: "/chat",
       headers: { "x-session-id": sessionId },
-    });
+    }),
+  });
+
+  const isLoading = status === "submitted" || status === "streaming";
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    sendMessage({ text: input });
+    setInput("");
+  }
 
   return (
     <div className="flex flex-col w-[40%] border-r border-border min-w-0">
@@ -41,7 +53,13 @@ export function ChatPanel() {
                   : "bg-muted text-foreground"
               }`}
             >
-              <p className="whitespace-pre-wrap">{m.content}</p>
+              {m.parts
+                .filter((p) => p.type === "text")
+                .map((p, i) => (
+                  <p key={i} className="whitespace-pre-wrap">
+                    {"text" in p ? p.text : ""}
+                  </p>
+                ))}
             </div>
           </div>
         ))}
@@ -65,7 +83,7 @@ export function ChatPanel() {
             className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="Message Kitsune..."
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
           />
           <button

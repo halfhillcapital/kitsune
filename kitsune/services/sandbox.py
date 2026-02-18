@@ -35,6 +35,11 @@ class SandboxManager:
         self._port_end = config.MARIMO_PORT_END
         self._timeout = config.MARIMO_CONTAINER_TIMEOUT
         self._data_dir = Path(config.NOTEBOOK_DATA_DIR)
+        # Host-side base path for Docker volume mounts. When Kitsune runs inside a
+        # container, this must point to the same directory on the *host* filesystem so
+        # that sibling sandbox containers can mount it. Falls back to _data_dir when
+        # running directly on the host (paths are identical in that case).
+        self._host_dir = Path(config.NOTEBOOK_HOST_DIR) if config.NOTEBOOK_HOST_DIR else self._data_dir
         self._seed_dir = Path("notebooks")
         self._containers: dict[str, ContainerInfo] = {}
         self._cleanup_task: asyncio.Task | None = None
@@ -71,7 +76,7 @@ class SandboxManager:
             detach=True,
             ports={"2718/tcp": port},
             volumes={
-                str(user_dir.resolve()): {"bind": "/notebooks", "mode": "rw"},
+                str((self._host_dir / session_id).resolve()): {"bind": "/notebooks", "mode": "rw"},
             },
             labels={"kitsune.session": session_id},
             name=f"kitsune-marimo-{session_id}",

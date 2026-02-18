@@ -9,6 +9,7 @@ dependencies = [
     "fastapi",
     "httpx",
     "logfire",
+    "marimo",
     "pydantic-ai",
     "uvicorn[standard]",
 ]

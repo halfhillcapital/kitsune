@@ -69,6 +69,11 @@ class Config:
     MARIMO_PORT_END: int = field(default_factory=lambda: int(required_env("MARIMO_PORT_END", "9200")))
     MARIMO_CONTAINER_TIMEOUT: int = field(default_factory=lambda: int(required_env("MARIMO_CONTAINER_TIMEOUT", "30")))
     NOTEBOOK_DATA_DIR: str = field(default_factory=lambda: required_env("NOTEBOOK_DATA_DIR", "data/notebooks"))
+    # When Kitsune runs inside Docker it spawns sibling sandbox containers via the host
+    # Docker daemon. Volume paths passed to the daemon must be host-side paths, not paths
+    # inside the Kitsune container. Set NOTEBOOK_HOST_DIR to the absolute host path that
+    # corresponds to NOTEBOOK_DATA_DIR. Leave empty when running outside Docker.
+    NOTEBOOK_HOST_DIR: str = field(default_factory=lambda: required_env("NOTEBOOK_HOST_DIR", ""))
 
 
 @lru_cache(maxsize=1)
