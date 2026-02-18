@@ -3,6 +3,8 @@ FROM python:3.14-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 RUN uv pip install --system \
+    pydantic-ai-slim[openai] \
+    openai \
     marimo \
     numpy \
     pandas \
@@ -15,10 +17,11 @@ RUN uv pip install --system \
     scipy \
     duckdb \
     sqlglot \
-    ruff \
-    openai
+    ruff
 
 RUN mkdir -p /notebooks
+
+WORKDIR /notebooks
 
 EXPOSE 2718
 

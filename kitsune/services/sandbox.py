@@ -80,6 +80,7 @@ class SandboxManager:
             },
             labels={"kitsune.session": session_id},
             name=f"kitsune-marimo-{session_id}",
+            extra_hosts={"host.docker.internal": "host-gateway"},
             remove=True,
         )
 
