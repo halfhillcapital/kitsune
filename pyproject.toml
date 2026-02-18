@@ -12,16 +12,3 @@ dependencies = [
     "pydantic-ai",
     "uvicorn[standard]",
 ]
-
-[project.optional-dependencies]
-notebooks = [
-    "marimo",
-    "numpy",
-    "pandas",
-    "polars",
-    "matplotlib",
-    "seaborn",
-    "plotly",
-    "scikit-learn",
-    "scipy",
-]

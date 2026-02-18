@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 import logfire
 import uvicorn
 from fastapi import FastAPI, Request, Response
-from pydantic_ai.ui.ag_ui import AGUIAdapter
+from fastapi.staticfiles import StaticFiles
+from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 
 from kitsune.agents.marimo import create_agent, create_deps
 from kitsune.services.sandbox import SandboxManager
@@ -32,13 +33,13 @@ async def health():
     return {"status": "ok"}
 
 
-# AG-UI chat endpoint
-@app.post("/ag-ui")
-async def ag_ui(request: Request) -> Response:
+# Vercel AI chat endpoint
+@app.post("/chat")
+async def chat(request: Request) -> Response:
     # TODO: extract session_id from auth/header once auth is wired up
     session_id = request.headers.get("x-session-id", "default")
     deps = create_deps(session_id=session_id, sandbox=sandbox)
-    return await AGUIAdapter.dispatch_request(request, agent=agent, deps=deps)
+    return await VercelAIAdapter.dispatch_request(request, agent=agent, deps=deps)
 
 
 # Notebook listing (scoped to session)
@@ -63,6 +64,10 @@ async def get_notebook_url(session_id: str):
     info = await sandbox.get_or_create(session_id)
     return {"url": f"http://localhost:{info.host_port}"}
 
+
+static_dir = pathlib.Path("static")
+if static_dir.exists():
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8010, reload=True)

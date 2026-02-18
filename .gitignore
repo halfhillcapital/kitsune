@@ -204,6 +204,12 @@ cython_debug/
 # Sandbox data
 data/
 
+# Frontend build artifact
+static/
+
+# Frontend dependencies
+frontend/node_modules/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
