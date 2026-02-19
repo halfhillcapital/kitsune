@@ -3,8 +3,9 @@ FROM python:3.14-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 RUN uv pip install --system \
-    pydantic-ai-slim[openai] \
+    pydantic-ai \
     openai \
+    mcp \
     marimo \
     numpy \
     pandas \
