@@ -112,6 +112,20 @@ class SandboxManager:
             info.touch()
         return info
 
+    def status(self) -> dict:
+        now = time.time()
+        return {
+            "containers": len(self._containers),
+            "sessions": [
+                {
+                    "session_id": info.session_id,
+                    "host_port": info.host_port,
+                    "idle_seconds": int(now - info.last_activity),
+                }
+                for info in self._containers.values()
+            ],
+        }
+
     def get_user_dir(self, session_id: str) -> Path:
         return self._data_dir / session_id
 
@@ -171,6 +185,8 @@ class SandboxManager:
             await self._cleanup_stale()
 
     async def _cleanup_stale(self) -> None:
+        import httpx
+
         now = time.time()
         cutoff = now - (self._timeout * 60)
         stale = [
@@ -178,4 +194,19 @@ class SandboxManager:
             if info.last_activity < cutoff
         ]
         for sid in stale:
+            info = self._containers.get(sid)
+            if info is None:
+                continue
+            # Check if anyone has the notebook open before killing it
+            try:
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get(
+                        f"http://localhost:{info.host_port}/api/status/connections",
+                        timeout=3,
+                    )
+                    if resp.status_code == 200 and resp.json().get("active", 0) > 0:
+                        info.touch()
+                        continue
+            except Exception:
+                pass  # Unreachable container — proceed with cleanup
             await self.destroy(sid)

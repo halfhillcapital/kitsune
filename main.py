@@ -41,6 +41,11 @@ async def chat(request: Request) -> Response:
     deps = create_deps(session_id=session_id, sandbox=sandbox)
     return await VercelAIAdapter.dispatch_request(request, agent=agent, deps=deps)
 
+#TODO: add auth and session management to these endpoints as well, and enforce that users can only access their own sandbox/notebooks
+@app.get("/sandbox/status")
+async def sandbox_status():
+    return sandbox.status()
+
 
 # Notebook listing (scoped to session)
 @app.get("/notebooks")
