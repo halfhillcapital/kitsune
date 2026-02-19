@@ -9,7 +9,7 @@ interface Notebook {
 export function NotebookPanel() {
   const sessionId = useSession();
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
-  const [notebookUrl, setNotebookUrl] = useState<string | null>(null);
+  const [baseUrl, setBaseUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   useEffect(() => {
@@ -17,15 +17,19 @@ export function NotebookPanel() {
       .then((r) => r.json())
       .then((data: Notebook[]) => {
         setNotebooks(data);
-        if (data.length > 0) setActiveTab(data[0].name);
+        const welcome = data.find((nb) => nb.name === "Welcome");
+        setActiveTab(welcome ? "Welcome" : data[0]?.name ?? null);
       })
       .catch(() => {});
 
     fetch(`/notebooks/${sessionId}`)
       .then((r) => r.json())
-      .then((data: { url: string }) => setNotebookUrl(data.url))
+      .then((data: { url: string }) => setBaseUrl(data.url))
       .catch(() => {});
   }, [sessionId]);
+
+  const iframeSrc =
+    baseUrl && activeTab ? `${baseUrl}/?file=${activeTab}.py` : null;
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
@@ -50,11 +54,12 @@ export function NotebookPanel() {
 
       {/* Iframe or skeleton */}
       <div className="flex-1 relative">
-        {notebookUrl ? (
+        {iframeSrc ? (
           <iframe
-            src={notebookUrl}
+            key={iframeSrc}
+            src={iframeSrc}
             className="absolute inset-0 w-full h-full border-0"
-            title="Marimo notebook"
+            title={activeTab ?? "Marimo notebook"}
           />
         ) : (
           <div className="absolute inset-0 p-4 space-y-3">
