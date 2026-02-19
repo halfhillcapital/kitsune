@@ -1108,7 +1108,9 @@ dependencies = [
     { name = "logfire" },
     { name = "marimo" },
     { name = "pydantic-ai" },
+    { name = "sse-starlette" },
     { name = "uvicorn", extra = ["standard"] },
+    { name = "watchfiles" },
 ]
 
 [package.metadata]
@@ -1119,7 +1121,9 @@ requires-dist = [
     { name = "logfire" },
     { name = "marimo" },
     { name = "pydantic-ai" },
+    { name = "sse-starlette" },
     { name = "uvicorn", extras = ["standard"] },
+    { name = "watchfiles" },
 ]
 
 [[package]]

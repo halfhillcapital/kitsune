@@ -13,15 +13,29 @@ export function NotebookPanel() {
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/notebooks", { headers: { "x-session-id": sessionId } })
-      .then((r) => r.json())
-      .then((data: Notebook[]) => {
-        setNotebooks(data);
-        const welcome = data.find((nb) => nb.name === "Welcome");
-        setActiveTab(welcome ? "Welcome" : data[0]?.name ?? null);
-      })
-      .catch(() => {});
+    // EventSource can't send custom headers, so session_id is a query param here
+    const es = new EventSource(`/notebooks/watch?session_id=${sessionId}`);
+    let initialized = false;
 
+    es.onmessage = (e) => {
+      const data: Notebook[] = JSON.parse(e.data);
+      setNotebooks(data);
+      setActiveTab((prev) => {
+        if (!initialized) {
+          initialized = true;
+          const welcome = data.find((nb) => nb.name === "Welcome");
+          return welcome ? "Welcome" : data[0]?.name ?? null;
+        }
+        // Keep selection unless the active tab was deleted
+        const stillExists = data.some((nb) => nb.name === prev);
+        return stillExists ? prev : data[0]?.name ?? null;
+      });
+    };
+
+    return () => es.close();
+  }, [sessionId]);
+
+  useEffect(() => {
     fetch(`/notebooks/${sessionId}`)
       .then((r) => r.json())
       .then((data: { url: string }) => setBaseUrl(data.url))

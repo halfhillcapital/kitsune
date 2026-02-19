@@ -1,11 +1,15 @@
+import asyncio
+import json
 import pathlib
 from contextlib import asynccontextmanager
 
 import logfire
 import uvicorn
+import watchfiles
 from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
+from sse_starlette.sse import EventSourceResponse
 
 from kitsune.agents.marimo import create_agent, create_deps
 from kitsune.services.sandbox import SandboxManager
@@ -47,13 +51,9 @@ async def sandbox_status():
     return sandbox.status()
 
 
-# Notebook listing (scoped to session)
-@app.get("/notebooks")
-async def list_notebooks(request: Request):
-    session_id = request.headers.get("x-session-id", "default")
-    nb_dir = sandbox.get_user_dir(session_id)
-    if not nb_dir.exists():
-        # Fall back to template notebooks
+def _list_notebooks(nb_dir: pathlib.Path) -> list[dict]:
+    """List .py notebooks in nb_dir, falling back to templates if none exist."""
+    if not nb_dir.exists() or not any(nb_dir.glob("*.py")):
         nb_dir = pathlib.Path("notebooks")
     if not nb_dir.exists():
         return []
@@ -61,6 +61,42 @@ async def list_notebooks(request: Request):
         {"name": p.stem, "path": f"/notebooks/{p.stem}"}
         for p in sorted(nb_dir.glob("*.py"))
     ]
+
+
+# Notebook listing (scoped to session)
+@app.get("/notebooks")
+async def list_notebooks(request: Request):
+    session_id = request.headers.get("x-session-id", "default")
+    nb_dir = sandbox.get_user_dir(session_id)
+    return _list_notebooks(nb_dir)
+
+
+# SSE endpoint that pushes notebook list updates when .py files change.
+# EventSource can't send custom headers, so session_id is passed as a query
+# param here only — intentional divergence from the header-based pattern.
+@app.get("/notebooks/watch")
+async def watch_notebooks(request: Request, session_id: str):
+    nb_dir = sandbox.get_user_dir(session_id)
+    nb_dir.mkdir(parents=True, exist_ok=True)  # awatch requires path to exist
+
+    async def generator():
+        stop = asyncio.Event()
+
+        async def _watch_disconnect():
+            while not await request.is_disconnected():
+                await asyncio.sleep(0.5)
+            stop.set()
+
+        asyncio.create_task(_watch_disconnect())
+
+        # Emit current list immediately so the client doesn't wait for a change
+        yield {"data": json.dumps(_list_notebooks(nb_dir))}
+
+        async for changes in watchfiles.awatch(nb_dir, stop_event=stop):
+            if any(str(p).endswith(".py") for _, p in changes):
+                yield {"data": json.dumps(_list_notebooks(nb_dir))}
+
+    return EventSourceResponse(generator())
 
 
 # Get or create sandbox container, return marimo edit URL
