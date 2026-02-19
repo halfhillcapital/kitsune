@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 
 from kitsune.config import get_config
+from kitsune.utils import is_public_url
 
 
 class LinkupSource(BaseModel):
@@ -88,6 +89,9 @@ def with_linkup(agent: Agent[AgentDepsT, AgentResultT]) -> Agent[AgentDepsT, Age
 	
     @agent.tool_plain
     async def fetch_tool(url: str, render_js: bool = False) -> LinkupFetchResult:
-        return await fetch_linkup(url, render_js)
+        if is_public_url(url):
+            return await fetch_linkup(url, render_js)
+        else:
+            raise ValueError("Blocked URL: only public http(s) URLs are allowed")
 
     return agent
