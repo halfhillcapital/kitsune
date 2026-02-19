@@ -22,7 +22,6 @@ Kitsune is an AI agent microservice with a React frontend. FastAPI backend with 
 ```bash
 uv sync                                          # Install Python dependencies
 uv run main.py                                   # Run FastAPI on localhost:8010 (auto-reload)
-docker build -t kitsune-marimo-sandbox docker/marimo/   # Build sandbox image
 cd frontend && npm install                       # Install frontend dependencies
 cd frontend && npm run dev                       # Vite dev server on :5173 (proxies API to :8010)
 cd frontend && npm run build                     # Build frontend → static/ (served by FastAPI)

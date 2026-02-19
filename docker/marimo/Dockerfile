@@ -18,9 +18,14 @@ RUN uv pip install --system \
     scipy \
     duckdb \
     sqlglot \
-    ruff
+    ruff \
+    python-lsp-server \
+    python-lsp-ruff \
+    websockets
 
-RUN mkdir -p /notebooks
+RUN mkdir -p /notebooks /root/.config/marimo
+
+COPY docker/marimo/marimo.toml /root/.config/marimo/marimo.toml
 
 WORKDIR /notebooks
 
