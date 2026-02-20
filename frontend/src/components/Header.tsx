@@ -1,13 +1,20 @@
 export function Header() {
   return (
-    <header className="flex h-12 shrink-0 border-b border-border overflow-hidden">
-      <div className="flex items-center gap-2 px-4 w-[40%]">
-        <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-amber-400 to-rose-500">
-          <span className="text-white font-bold text-xs">K</span>
-        </div>
-        <span className="font-semibold text-sm tracking-tight">Kitsune</span>
+    <header className="flex items-center h-12 shrink-0 border-b border-jet-light/50 bg-carbon/40">
+      {/* Brand section aligned with chat panel */}
+      <div className="flex items-center gap-3 px-5 w-[40%]">
+        <span className="font-display text-sm tracking-wider text-linen/90 uppercase">
+          Kitsune
+        </span>
+        <span className="text-[10px] font-body font-light tracking-widest text-rose/50 uppercase ml-1">
+          agent
+        </span>
       </div>
-      <div className="flex-1 bg-gradient-to-r from-amber-400/80 via-orange-400/80 to-rose-400/80" />
+
+      {/* Accent line — brick red gradient fading out */}
+      <div className="flex-1 flex items-center h-full">
+        <div className="h-px w-full bg-gradient-to-r from-brick/60 via-brick/20 to-transparent" />
+      </div>
     </header>
   );
 }

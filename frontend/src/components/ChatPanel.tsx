@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { Send } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 
 export function ChatPanel() {
   const sessionId = useSession();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [inputFocused, setInputFocused] = useState(false);
 
   const { messages, status, sendMessage } = useChat({
     transport: new DefaultChatTransport({
@@ -32,25 +33,39 @@ export function ChatPanel() {
   }
 
   return (
-    <div className="flex flex-col w-[40%] border-r border-border min-w-0">
+    <div className="flex flex-col w-[40%] border-r border-jet-light/50 min-w-0 bg-jet">
       {/* Message list */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground gap-2">
-            <p className="text-sm">Start a conversation with Kitsune</p>
-            <p className="text-xs">Ask me to create or modify a notebook</p>
+          <div className="flex flex-col items-center justify-center h-full text-center gap-4 animate-fade-in">
+            <img
+              src="/kitsune-logo.png"
+              alt=""
+              className="w-16 h-16 object-contain opacity-20"
+            />
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-linen/60">
+                Start a conversation with Kitsune
+              </p>
+              <p className="text-xs text-linen/30">
+                Ask me to create or modify a notebook
+              </p>
+            </div>
           </div>
         )}
-        {messages.map((m) => (
+        {messages.map((m, idx) => (
           <div
             key={m.id}
-            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} ${
+              m.role === "user" ? "animate-slide-right" : "animate-slide-left"
+            }`}
+            style={{ animationDelay: `${Math.min(idx * 0.05, 0.3)}s` }}
           >
             <div
-              className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+              className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
                 m.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-foreground"
+                  ? "bg-brick text-linen rounded-br-sm"
+                  : "bg-carbon text-linen/90 rounded-bl-sm border border-jet-light/40"
               }`}
             >
               {m.parts
@@ -63,13 +78,19 @@ export function ChatPanel() {
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-lg px-3 py-2">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" />
+        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+          <div className="flex justify-start animate-slide-left">
+            <div className="bg-carbon rounded-xl rounded-bl-sm border border-jet-light/40 px-4 py-3">
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="w-1.5 h-1.5 bg-brick rounded-full"
+                    style={{
+                      animation: `typing-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -77,21 +98,31 @@ export function ChatPanel() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-border p-3">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="px-4 pb-4 pt-2">
+        <form
+          onSubmit={handleSubmit}
+          className={`flex items-center gap-2 rounded-xl border bg-carbon/80 px-3 py-2 transition-all duration-300 ${
+            inputFocused
+              ? "border-brick/50 shadow-[0_0_20px_rgba(189,47,37,0.1)]"
+              : "border-jet-light/50"
+          }`}
+        >
+          <Sparkles className="h-4 w-4 text-brick/40 shrink-0" />
           <input
-            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 bg-transparent text-sm text-linen placeholder:text-linen/25 focus:outline-none"
             placeholder="Message Kitsune..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-9 w-9 hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50 transition-colors"
+            className="flex items-center justify-center rounded-lg h-8 w-8 bg-brick text-linen transition-all duration-200 hover:bg-brick-glow disabled:opacity-30 disabled:hover:bg-brick shrink-0"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3.5 w-3.5" />
           </button>
         </form>
       </div>
